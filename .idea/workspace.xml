@@ -9,7 +9,11 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8a2277b9-7704-49ed-b3ad-2700be25e194" name="Changes" comment="" />
+    <list default="true" id="8a2277b9-7704-49ed-b3ad-2700be25e194" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Bus.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/City.h" beforeDir="false" afterPath="$PROJECT_DIR$/City.h" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -97,5 +101,8 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="LAST_COMMIT_MESSAGE" value="" />
   </component>
 </project>

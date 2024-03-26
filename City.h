@@ -5,6 +5,9 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <iostream>
+#include "Crossroad.h"
+#include "Street.h"
+#include "Bus.h"
 
 class City {
 private:
@@ -12,10 +15,10 @@ private:
     int numberOfStreets;
     std::vector<std::vector<int>> city;
     std::unordered_map<Crossroad, std::unordered_set<Street>> crossroadToStreets;
-    std::vector<int> buses;
+    std::vector<Bus> buses;
 
 public:
-    City(int _numberOfCrossroads, int _numberOfStreets, std::vector<Street> _streets) : numberOfCrossroads(_numberOfCrossroads), numberOfStreets(_numberOfStreets), city(std::vector<int>(N, std::vector<int>(N, INT_MAX))), buses(std::vector<int>) {
+    City(int _numberOfCrossroads, int _numberOfStreets, std::vector<Street> _streets) : numberOfCrossroads(_numberOfCrossroads), numberOfStreets(_numberOfStreets), city(std::vector<int>(N, std::vector<int>(N, INT_MAX))), buses(std::vector<Bus>) {
         for(int i = 0; i < numberOfCrossroads; ++i) {
             for(int j = 0; j < numberOfCrossroads; ++j) {
                 if(i == j) {
