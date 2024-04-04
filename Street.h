@@ -1,32 +1,38 @@
 #ifndef BUSES_1_STREET_H
 #define BUSES_1_STREET_H
 
+#include "Crossroad.h"
+
 class Street {
 private:
-    const Crossroad A;
-    const Crossroad B;
+    Crossroad A;
+    Crossroad B;
     int duration;
 
 public:
-    Street(const Crossroad &_A, const Crossroad &_B, int &_duration) : A(_A), B(_B), duration(_duration) {}
+    Street() = default;
 
-    Crossroad getFirst() const {
-        return A;
+    Street(const Crossroad &A, const Crossroad &B, int _duration) : A(A), B(B), duration(_duration) {}
+
+    Street(char aValue, char bValue, int _duration) : A(aValue), B(bValue), duration(_duration) {}
+
+    const Crossroad* getFirst() const {
+        return &A;
     }
 
-    Crossroad getSecond() const {
-        return B;
+    const Crossroad* getSecond() const {
+        return &B;
     }
 
-    int getDuration() {
+    int getDuration() const {
         return duration;
     }
 
-    void setFirst(Crossroad new_A) {
+    void setFirst(Crossroad &new_A) {
         A = new_A;
     }
 
-    void setSecond(Crossroad new_B) {
+    void setSecond(Crossroad &new_B) {
         B = new_B;
     }
 
@@ -34,6 +40,6 @@ public:
         duration = newDuration;
     }
 
-    ~Street() {}
+    ~Street() = default;
 };
 #endif //BUSES_1_STREET_H
