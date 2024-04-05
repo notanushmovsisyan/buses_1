@@ -15,8 +15,8 @@ private:
 
 public:
     Bus() = default;
-    Bus(Crossroad* _s, Crossroad* _d) : source(source), dest(_d), duration(0) {}
-    Bus(Crossroad* _s, Crossroad* _d, int _dur) : source(source), dest(_d), duration(_dur) {}
+    Bus(Crossroad* _s, Crossroad* _d) : source(_s), dest(_d), duration(0) {}
+    Bus(Crossroad* _s, Crossroad* _d, int _dur) : source(_s), dest(_d), duration(_dur) {}
 
     Crossroad* getSource() {
         return source;
