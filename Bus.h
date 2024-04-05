@@ -9,20 +9,20 @@
 
 class Bus {
 private:
-    Crossroad source;
-    Crossroad dest;
+    Crossroad* source;
+    Crossroad* dest;
     int duration;
 
 public:
     Bus() = default;
-    Bus(Crossroad _s, Crossroad _d) : source(source), dest(_d), duration(0) {}
-    Bus(Crossroad _s, Crossroad _d, int _dur) : source(source), dest(_d), duration(_dur) {}
+    Bus(Crossroad* _s, Crossroad* _d) : source(source), dest(_d), duration(0) {}
+    Bus(Crossroad* _s, Crossroad* _d, int _dur) : source(source), dest(_d), duration(_dur) {}
 
-    Crossroad getSource() {
+    Crossroad* getSource() {
         return source;
     }
 
-    Crossroad getDestination() {
+    Crossroad* getDestination() {
         return dest;
     }
 
