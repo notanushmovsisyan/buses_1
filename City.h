@@ -4,45 +4,139 @@
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
-#include <iostream>
+#include <algorithm>
+#include <cstdint>
+#include "Street.h"
+#include "Crossroad.h"
+#include "Bus.h"
+#include <stdexcept>
 
 class City {
 private:
     int numberOfCrossroads;
     int numberOfStreets;
-    std::vector<std::vector<int>> city;
-    std::unordered_map<Crossroad, std::unordered_set<Street>> crossroadToStreets;
-    std::vector<int> buses;
+    std::vector<std::vector<int> > city;
+    std::unordered_map<Crossroad*, std::unordered_set<Street*> > crossroadToStreets;
+    std::unordered_map<char, Crossroad*> crossroads;
+    std::vector<std::vector<int> > shortestPaths;
+    std::unordered_map<Bus*, int> busToIndex;
+    std::unordered_map<int, Bus*> indexToBus;
 
-public:
-    City(int _numberOfCrossroads, int _numberOfStreets, std::vector<Street> _streets) : numberOfCrossroads(_numberOfCrossroads), numberOfStreets(_numberOfStreets), city(std::vector<int>(N, std::vector<int>(N, INT_MAX))), buses(std::vector<int>) {
-        for(int i = 0; i < numberOfCrossroads; ++i) {
-            for(int j = 0; j < numberOfCrossroads; ++j) {
-                if(i == j) {
-                    city[i][j] == 0;
-                }
-            }
+    Crossroad* getCrossroad(const char &data) {
+        auto crossroadIt = crossroads.find(data);
+        if (crossroadIt != crossroads.end()) {
+            return reinterpret_cast<Crossroad *>(&(crossroadIt->second)); //removed &
         }
+        return nullptr;
+    }
 
-        for(int k = 0; k < numberOfStreets; ++k) {
-                char firstCrossroadValue = _streets[k].getFirst().getValue();
-                char secondCrossroadValue = _streets[k].getSecond().getValue();
+    void floydWarshallAlgo() {
 
-                int i = firstCrossroadValue - 65;
-                int j = secondCrossroadValue - 65;
-
-                city[i][j] = _streets[k].getDuration();
-        }
-
-        for(int i = 0; i < numberOfCrossroads; ++i) {
-            char key = (char) (i + 65);
-
-            for(int j = 0; j < numberOfStreets; ++j) {
-                if(_streets[j].getFirst() == key || _streets[j].getSecond() == key) {
-                    crossroadToStreets[key].insert(_streets[j]);
+        for (int k = 0; k < numberOfCrossroads; k++) {
+            for (int i = 0; i < numberOfCrossroads; i++) {
+                for (int j = 0; j < numberOfCrossroads; j++) {
+                    if (shortestPaths[i][k] != INT_MAX && shortestPaths[k][j] != INT_MAX) {
+                        if (shortestPaths[i][k] + shortestPaths[k][j] < shortestPaths[i][j]) {
+                            shortestPaths[i][j] = shortestPaths[i][k] + shortestPaths[k][j];
+                        }
+                    }
                 }
             }
         }
     }
+
+public:
+    City(int _numberOfCrossroads, int _numberOfStreets, std::vector<Street> _streets)
+    : numberOfCrossroads(_numberOfCrossroads), numberOfStreets(_numberOfStreets),
+    city(numberOfCrossroads,std::vector<int>(numberOfCrossroads, INT_MAX)),
+    shortestPaths(numberOfCrossroads,std::vector<int>(numberOfCrossroads, INT_MAX)) {
+
+        for(int i = 0; i < numberOfCrossroads; ++i) {
+            city[i][i] = 0;
+            shortestPaths[i][i] = 0;
+        }
+
+        for(int k = 0; k < numberOfStreets; ++k) {
+            char firstCrossroadValue = _streets[k].getFirst()->getValue();
+            char secondCrossroadValue = _streets[k].getSecond()->getValue();
+
+            int i = firstCrossroadValue - 65;
+            int j = secondCrossroadValue - 65;
+
+            city[i][j] = _streets[k].getDuration();
+            city[j][i] = _streets[k].getDuration();
+            shortestPaths[i][j] = _streets[k].getDuration();
+            shortestPaths[j][i] = _streets[k].getDuration();
+        }
+
+        floydWarshallAlgo();
+
+        for(int i = 0; i < numberOfCrossroads; ++i) {
+            char k = (char) (i + 65);
+            Crossroad* key = getCrossroad(k);
+
+            for(int j = 0; j < numberOfStreets; ++j) {
+
+                if(_streets[j].getFirst() == key || _streets[j].getSecond() == key) {
+                    crossroadToStreets[key].insert(&_streets[j]);
+                }
+            }
+        }
+
+        for(int i = 0; i < numberOfCrossroads; ++i) {
+            char key = (char) (i + 65);
+            Crossroad* k = getCrossroad(key);
+            crossroads[key] = k;
+        }
+
+    }
+
+    ~City() = default;
+
+    void printCity() {
+        std::cout << "City:" << std::endl;
+        for(int i = 0; i < numberOfCrossroads; ++i) {
+            for(int j = 0; j < numberOfCrossroads; ++j) {
+                std::cout << city[i][j] << " ";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
+    void printShortestPaths() {
+        std::cout << "Shortest Paths:" << std::endl;
+        for(int i = 0; i < numberOfCrossroads; ++i) {
+            for(int j = 0; j < numberOfCrossroads; ++j) {
+                std::cout << shortestPaths[i][j] << " ";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
+    int add_bus(char A, char B) {
+        int i = A - 65;
+        int j = B - 65;
+
+        Crossroad first = *getCrossroad(A);
+        Crossroad second = *getCrossroad(B);
+
+        if(shortestPaths[i][j] == INT_MAX || (i >= numberOfCrossroads || j >= numberOfCrossroads)) {
+            std::string message = "There is no path between " + std::string(1 ,A) + " and "
+                                + std::string(1,B) + ". A bus can't be added.";
+            throw std::invalid_argument(message);
+        }
+        Bus b(&first, &second, shortestPaths[i][j]);
+
+        if(busToIndex.find(&b) == busToIndex.end()) {
+            int busNumber = busToIndex.size();
+            busToIndex[&b] = busNumber;
+            indexToBus[busNumber] = &b;
+        }
+
+        return b.getDuration();
+    }
 };
+
 #endif //BUSES_1_CITY_H
