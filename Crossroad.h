@@ -1,7 +1,7 @@
 #ifndef BUSES_1_CROSSROAD_H
 #define BUSES_1_CROSSROAD_H
 
-//#include <functional>
+#include <iostream>
 
 class Crossroad {
 private:
@@ -17,7 +17,6 @@ public:
     }
 
     ~Crossroad() = default;
-
 };
 
 #endif //BUSES_1_CROSSROAD_H

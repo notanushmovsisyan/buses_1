@@ -25,8 +25,9 @@ void test1() {
 
     c.printCity();
     c.printShortestPaths();
-    std::cout << "Bus from A to B " << c.add_bus('A', 'B') << std::endl;
-    std::cout << "Bus from A to F " << c.add_bus('A', 'F') << std::endl;
+    c.add_bus('A', 'B');
+    c.add_bus('A', 'F');
+    c.printBuses();
 }
 
 int main() {
