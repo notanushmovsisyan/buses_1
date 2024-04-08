@@ -19,13 +19,14 @@ private:
     std::unordered_map<Crossroad*, std::unordered_set<Street*> > crossroadToStreets;
     std::unordered_map<char, Crossroad*> crossroads;
     std::vector<std::vector<int> > shortestPaths;
-    std::unordered_map<Bus*, int> busToIndex;
-    std::unordered_map<int, Bus*> indexToBus;
+    std::unordered_set<std::string> busIDs;
+    std::vector<Bus*> indexToBus;
+    std::vector<Crossroad> crossroadObjects;
 
     Crossroad* getCrossroad(const char &data) {
         auto crossroadIt = crossroads.find(data);
         if (crossroadIt != crossroads.end()) {
-            return reinterpret_cast<Crossroad *>(&(crossroadIt->second)); //removed &
+            return crossroadIt->second; //removed &
         }
         return nullptr;
     }
@@ -85,13 +86,21 @@ public:
 
         for(int i = 0; i < numberOfCrossroads; ++i) {
             char key = (char) (i + 65);
-            Crossroad* k = getCrossroad(key);
+            Crossroad* k = new Crossroad(key); // Create a new Crossroad object
             crossroads[key] = k;
+            crossroadObjects.push_back(*k);
         }
-
     }
 
     ~City() = default;
+
+    void printCrossroads() {
+        std::cout << "Crossroads: " << std::endl;
+        for (auto it = crossroads.begin(); it != crossroads.end(); ++it) {
+            std::cout << it->second->getValue() << " ";
+        }
+        std::cout << std::endl;
+    }
 
     void printCity() {
         std::cout << "City:" << std::endl;
@@ -115,27 +124,48 @@ public:
         std::cout << std::endl;
     }
 
+    void printBuses() {
+        for (const auto& busPtr : indexToBus) {
+            const Bus& bus = *busPtr;
+            std::cout << "Bus: " << bus.getSource()->getValue() << " to " << bus.getDestination()->getValue() << ", Duration: " << bus.getDuration() << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
+
     int add_bus(char A, char B) {
         int i = A - 65;
         int j = B - 65;
 
-        Crossroad first = *getCrossroad(A);
-        Crossroad second = *getCrossroad(B);
-
-        if(shortestPaths[i][j] == INT_MAX || (i >= numberOfCrossroads || j >= numberOfCrossroads)) {
+        if((i >= numberOfCrossroads || j >= numberOfCrossroads) || shortestPaths[i][j] == INT_MAX ) {
             std::string message = "There is no path between " + std::string(1 ,A) + " and "
-                                + std::string(1,B) + ". A bus can't be added.";
+                                  + std::string(1,B) + ". A bus can't be added.";
             throw std::invalid_argument(message);
         }
-        Bus b(&first, &second, shortestPaths[i][j]);
 
-        if(busToIndex.find(&b) == busToIndex.end()) {
-            int busNumber = busToIndex.size();
-            busToIndex[&b] = busNumber;
-            indexToBus[busNumber] = &b;
+        Crossroad* first = getCrossroad(A);
+
+        if (first == nullptr) {
+            throw std::out_of_range("Attempting to access invalid crossroad");
         }
 
-        return b.getDuration();
+        Crossroad* second = getCrossroad(B);
+
+        if (second == nullptr) {
+            throw std::out_of_range("Attempting to access invalid crossroad");
+        }
+
+        std::string id = std::to_string(i) + "," + std::to_string(j) + "," + std::to_string(shortestPaths[i][j]);
+
+        if(busIDs.find(id) != busIDs.end()) {
+            return shortestPaths[i][j];
+        }
+
+        busIDs.insert(id);
+        Bus* newBus = new Bus(first, second, shortestPaths[i][j]);
+        indexToBus.push_back(newBus);
+
+        return newBus->getDuration();
     }
 };
 
