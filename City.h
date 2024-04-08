@@ -32,14 +32,12 @@ private:
     }
 
     void floydWarshallAlgo() {
-
+        shortestPaths = city;
         for (int k = 0; k < numberOfCrossroads; k++) {
             for (int i = 0; i < numberOfCrossroads; i++) {
                 for (int j = 0; j < numberOfCrossroads; j++) {
                     if (shortestPaths[i][k] != INT_MAX && shortestPaths[k][j] != INT_MAX) {
-                        if (shortestPaths[i][k] + shortestPaths[k][j] < shortestPaths[i][j]) {
-                            shortestPaths[i][j] = shortestPaths[i][k] + shortestPaths[k][j];
-                        }
+                        shortestPaths[i][j] = std::min(shortestPaths[i][j], shortestPaths[i][k] + shortestPaths[k][j]);
                     }
                 }
             }
@@ -73,6 +71,13 @@ public:
         floydWarshallAlgo();
 
         for(int i = 0; i < numberOfCrossroads; ++i) {
+            char key = (char) (i + 65);
+            Crossroad* k = new Crossroad(key); // Create a new Crossroad object
+            crossroads[key] = k;
+            crossroadObjects.push_back(*k);
+        }
+
+        for(int i = 0; i < numberOfCrossroads; ++i) {
             char k = (char) (i + 65);
             Crossroad* key = getCrossroad(k);
 
@@ -82,13 +87,6 @@ public:
                     crossroadToStreets[key].insert(&_streets[j]);
                 }
             }
-        }
-
-        for(int i = 0; i < numberOfCrossroads; ++i) {
-            char key = (char) (i + 65);
-            Crossroad* k = new Crossroad(key); // Create a new Crossroad object
-            crossroads[key] = k;
-            crossroadObjects.push_back(*k);
         }
     }
 
@@ -166,6 +164,54 @@ public:
         indexToBus.push_back(newBus);
 
         return newBus->getDuration();
+    }
+
+    std::vector<Bus*> construct_street(char A, char B, int duration) {
+        int i = A - 65;
+        int j = B - 65;
+
+        if((i >= numberOfCrossroads || j >= numberOfCrossroads) || city[i][j] != INT_MAX) {
+            std::string message = "Either there is already a street between " + std::string(1 ,A) + " and "
+                                  + std::string(1,B) + " or these crossroads don't exist";
+            throw std::invalid_argument(message);
+        }
+
+        Crossroad* first = getCrossroad(A);
+
+        if (first == nullptr) {
+            throw std::out_of_range("Attempting to access invalid crossroad");
+        }
+
+        Crossroad* second = getCrossroad(B);
+
+        if (second == nullptr) {
+            throw std::out_of_range("Attempting to access invalid crossroad");
+        }
+
+        Street st(*first, *second, duration);
+
+        if (city[i][j] != INT_MAX && city[j][i] != INT_MAX) {
+            throw std::invalid_argument("Crossroad already exists");
+        }
+
+        city[i][j] = duration;
+        city[j][i] = duration;
+        crossroadToStreets[first].insert(&st);
+        crossroadToStreets[second].insert(&st);
+
+        if(shortestPaths[i][j] > duration) {
+            floydWarshallAlgo();
+
+            for (Bus* current : indexToBus) {
+                int m = current->getSource()->getValue() - 65;
+                int n = current->getDestination()->getValue() - 65;
+
+                if(current->getDuration() > shortestPaths[m][n]) {
+                    current->setDuration(shortestPaths[m][n]);
+                }
+            }
+        }
+        return indexToBus;
     }
 };
 

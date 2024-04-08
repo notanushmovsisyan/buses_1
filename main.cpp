@@ -28,6 +28,12 @@ void test1() {
     c.add_bus('A', 'B');
     c.add_bus('A', 'F');
     c.printBuses();
+
+    c.construct_street('A', 'E', 3);
+
+    c.printBuses();
+
+    c.printShortestPaths();
 }
 
 int main() {
